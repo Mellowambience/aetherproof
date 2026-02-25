@@ -1,0 +1,19 @@
+{
+  "name": "aetherproof",
+  "version": "1.0.0",
+  "description": "Voice + vision AI agent for human art verification — Gemini Live Agent Challenge",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run start --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "deploy": "npm run deploy --workspace=backend"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
