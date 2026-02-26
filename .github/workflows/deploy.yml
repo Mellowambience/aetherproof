@@ -1,4 +1,4 @@
-name: Deploy Backend to Cloud Run
+name: Deploy to Cloud Run
 
 on:
   push:
@@ -6,21 +6,18 @@ on:
       - main
     paths:
       - 'backend/**'
-
-env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: aetherproof-backend
-  REGION: us-central1
+      - '.github/workflows/deploy.yml'
 
 jobs:
   deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Authenticate with Google Cloud
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
@@ -28,15 +25,11 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Build and Push Docker Image
-        run: |
-          gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }} ./backend
-
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }} \
-            --platform managed \
-            --region ${{ env.REGION }} \
+          gcloud run deploy aetherproof-backend \
+            --source ./backend \
+            --region us-central1 \
             --allow-unauthenticated \
-            --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},SOLANA_NETWORK=devnet,PORT=8080,GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}"
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --set-env-vars GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},SOLANA_NETWORK=devnet,PORT=8080,GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
